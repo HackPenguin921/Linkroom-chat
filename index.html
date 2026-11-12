@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#171821" />
+  <meta name="description" content="スマホとPCで使える、リアルタイムのコミュニティチャット" />
+  <title>LinkRoom | みんなのチャット</title>
+  <link rel="stylesheet" href="./styles.css" />
+  <script src="./firebase-config.js" defer></script>
+  <script type="module" src="./app.js"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <nav class="server-rail" aria-label="ワークスペース">
+      <div class="rail-logo" title="LinkRoom">L<span class="rail-star">✦</span></div>
+      <div class="rail-divider"></div>
+      <div class="rail-server rail-server-active" aria-label="コミュニティ" title="コミュニティ">
+        <svg class="icon" aria-hidden="true"><use href="#i-message-square"></use></svg>
+      </div>
+      <div class="rail-spacer"></div>
+      <button class="rail-action" id="theme-button" title="テーマを切り替え" aria-label="テーマを切り替え" type="button">
+        <svg class="icon" aria-hidden="true"><use href="#i-moon"></use></svg>
+      </button>
+    </nav>
+
+    <div id="mobile-backdrop" class="mobile-backdrop" hidden></div>
+
+    <aside class="channel-panel" id="channel-panel" aria-label="チャンネル一覧">
+      <div class="workspace-title">
+        <div class="workspace-logo">✦</div>
+        <div class="workspace-copy"><strong>LinkRoom</strong><span>COMMUNITY SPACE</span></div>
+        <button class="icon-button mobile-close" id="close-menu" aria-label="メニューを閉じる" type="button">
+          <svg class="icon"><use href="#i-x"></use></svg>
+        </button>
+      </div>
+      <div class="channel-scroll">
+        <div class="community-card">
+          <span class="community-pill"><span class="small-green-dot"></span> YOUR COMMUNITY</span>
+          <h2>ようこそ、<br>LinkRoomへ <span>👋</span></h2>
+          <p>話したいことを、自由に。</p>
+          <div class="community-orb orb-one"></div><div class="community-orb orb-two"></div>
+        </div>
+        <div class="section-heading"><span>テキストチャンネル</span><svg class="icon"><use href="#i-chevron-down"></use></svg></div>
+        <div class="channels" id="channel-buttons" role="navigation" aria-label="部屋を選択">
+          <button class="channel active" type="button" data-room="general" aria-current="page"><span class="channel-hash">#</span><span>雑談ルーム</span><span class="channel-live-dot"></span></button>
+          <button class="channel" type="button" data-room="vrchat"><span class="channel-hash">#</span><span>VRChat</span></button>
+          <button class="channel" type="button" data-room="gaming"><span class="channel-hash">#</span><span>ゲーム・趣味</span></button>
+        </div>
+        <div class="section-heading space-above"><span>このサイトについて</span></div>
+        <div class="side-note"><svg class="icon"><use href="#i-shield"></use></svg><span>気持ちのよい会話を<br>心がけましょう</span></div>
+        <button class="invite-button" id="invite-button" type="button"><svg class="icon"><use href="#i-link"></use></svg><span>サイトのリンクをコピー</span></button>
+      </div>
+      <div class="user-area">
+        <div class="user-avatar" id="my-avatar">G</div>
+        <div class="user-info"><strong id="my-name">ゲスト</strong><span><span class="small-green-dot"></span> オンライン</span></div>
+        <button class="icon-button" id="edit-profile-button" title="名前を変更" aria-label="名前を変更" type="button"><svg class="icon"><use href="#i-settings"></use></svg></button>
+      </div>
+    </aside>
+
+    <main class="chat-main">
+      <header class="chat-header">
+        <div class="header-left">
+          <button class="icon-button hamburger" id="open-menu" aria-label="チャンネルメニューを開く" type="button"><svg class="icon"><use href="#i-menu"></use></svg></button>
+          <div class="header-hash">#</div>
+          <div class="header-room"><h1 id="room-title">雑談ルーム</h1><p id="room-subtitle">気軽におしゃべりしよう</p></div>
+        </div>
+        <div class="header-tools">
+          <span class="connection-status" id="connection-status"><span class="status-circle"></span><span id="connection-text">準備中</span></span>
+          <button class="icon-button" id="search-button" title="メッセージを検索" aria-label="メッセージを検索" aria-expanded="false" type="button"><svg class="icon"><use href="#i-search"></use></svg></button>
+          <button class="icon-button" id="info-button" title="この部屋について" aria-label="この部屋について" aria-expanded="false" type="button"><svg class="icon"><use href="#i-info"></use></svg></button>
+        </div>
+      </header>
+
+      <div class="search-bar" id="search-bar" hidden>
+        <svg class="icon" aria-hidden="true"><use href="#i-search"></use></svg>
+        <input id="search-input" type="search" maxlength="100" placeholder="この部屋の最新100件から検索…" aria-label="メッセージを検索" />
+        <button class="icon-button" id="close-search" type="button" aria-label="検索を閉じる"><svg class="icon"><use href="#i-x"></use></svg></button>
+      </div>
+
+      <div id="demo-banner" class="demo-banner" hidden>
+        <svg class="icon" aria-hidden="true"><use href="#i-info"></use></svg>
+        <span><strong>デモモード</strong> — メッセージはこのブラウザだけに保存。別端末と会話するには Firebase を設定してね。</span>
+      </div>
+      <div id="error-banner" class="error-banner" hidden role="alert"></div>
+
+      <section class="conversation" id="conversation" aria-label="メッセージ">
+        <div class="conversation-inner">
+          <div class="room-intro">
+            <div class="room-intro-icon">#</div>
+            <span class="eyebrow">WELCOME TO THE CHANNEL</span>
+            <h2 id="intro-title">雑談ルームへようこそ！</h2>
+            <p id="intro-description">なんでも気軽に話してね。ここから会話が始まります。</p>
+            <div class="intro-divider"></div>
+          </div>
+          <div id="messages" class="messages" aria-live="polite" aria-relevant="additions text"></div>
+          <div id="empty-state" class="empty-state" hidden>まだ投稿がありません。最初のメッセージを送ってみよう！ ✨</div>
+        </div>
+      </section>
+
+      <div class="composer-wrap">
+        <div class="composer-hint"><span><span class="small-green-dot"></span> <span id="composer-channel"># 雑談ルーム</span></span><span>みんなに届くメッセージ</span></div>
+        <form id="message-form" class="composer" autocomplete="off">
+          <textarea id="message-input" rows="1" maxlength="2000" placeholder="メッセージを入力…" aria-label="メッセージを入力" required></textarea>
+          <button id="send-button" type="submit" class="send-button" aria-label="送信"><svg class="icon"><use href="#i-send"></use></svg></button>
+        </form>
+        <div class="composer-footer"><span>Enter で送信 ・ Shift + Enter で改行</span><span id="char-counter">0 / 2000</span></div>
+      </div>
+    </main>
+
+    <aside class="info-panel" id="info-panel" aria-label="コミュニティ情報">
+      <div class="info-top"><h2>コミュニティ情報</h2><button id="close-info" type="button" class="icon-button info-close" aria-label="情報を閉じる"><svg class="icon"><use href="#i-x"></use></svg></button></div>
+      <div class="info-content">
+        <div class="info-hero"><div class="info-hero-icon">✦</div><strong>LinkRoom</strong><span>つながる、ひろがる。</span></div>
+        <div class="info-block"><div class="info-label">このチャンネル</div><strong id="info-room"># 雑談ルーム</strong><p id="info-description">気軽におしゃべりしよう</p></div>
+        <div class="info-block"><div class="info-label">チャットのルール</div><div class="rule-item"><span>💜</span> お互いを尊重しよう</div><div class="rule-item"><span>🛡️</span> 個人情報を書かない</div><div class="rule-item"><span>✨</span> みんなが楽しめる場所に</div></div>
+        <div class="info-block info-help"><div class="info-label">使い方</div><p>プロフィールの歯車から表示名を変更できます。自分の投稿は削除できます。</p></div>
+      </div>
+    </aside>
+  </div>
+
+  <dialog id="profile-dialog" class="profile-dialog" aria-labelledby="profile-dialog-title">
+    <form id="profile-form" method="dialog">
+      <div class="modal-mark">✦</div><h2 id="profile-dialog-title">プロフィール設定</h2>
+      <p>チャットで表示される名前を設定しよう。</p>
+      <label for="nickname-input">表示名（24文字以内）</label>
+      <input id="nickname-input" name="nickname" maxlength="24" required autocomplete="nickname" placeholder="例：みーこ" />
+      <div class="modal-note">※ 名前の変更は今後の投稿に反映されます。過去の投稿の名前は変わりません。</div>
+      <div class="modal-actions"><button class="button-secondary" type="button" id="cancel-profile">キャンセル</button><button class="button-primary" type="submit">保存する</button></div>
+    </form>
+  </dialog>
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+  <!-- 追加ライブラリなしの軽量SVGアイコン -->
+  <svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
+    <symbol id="i-message-square" viewBox="0 0 24 24"><path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8A8.5 8.5 0 0 1 12.5 20a8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8A8.5 8.5 0 0 1 12.5 3H13a8.5 8.5 0 0 1 8 8v.5Z"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20.9 13.4A9 9 0 0 1 10.6 3.1 9 9 0 1 0 20.9 13.4Z"/></symbol>
+    <symbol id="i-chevron-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-4"/></symbol>
+    <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7 .5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></symbol>
+    <symbol id="i-settings" viewBox="0 0 24 24"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.86 2.86-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 1.56V21h-4v-.04A1.7 1.7 0 0 0 9 19.4a1.7 1.7 0 0 0-1.88.34l-.06.06-2.86-2.86.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.56-1H3v-4h.04A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.34-1.88l-.06-.06L7.06 4.2l.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-1.56V3h4v.04A1.7 1.7 0 0 0 15 4.6a1.7 1.7 0 0 0 1.88-.34l.06-.06 2.86 2.86-.06.06A1.7 1.7 0 0 0 19.4 9a1.7 1.7 0 0 0 1.56 1H21v4h-.04A1.7 1.7 0 0 0 19.4 15Z"/></symbol>
+    <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></symbol>
+    <symbol id="i-send" viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4 20-7ZM22 2 11 13"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M6 6l1 15h10l1-15M10 10v7M14 10v7"/></symbol>
+  </svg>
+</body>
+</html>
