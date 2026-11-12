@@ -4,145 +4,142 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#171821" />
-  <meta name="description" content="スマホとPCで使える、リアルタイムのコミュニティチャット" />
-  <title>LinkRoom | みんなのチャット</title>
+  <meta name="description" content="招待コードで集まる、プライベートなリアルタイムチャット LinkRoom" />
+  <title>LinkRoom | 招待制チャット</title>
   <link rel="stylesheet" href="./styles.css" />
+  <link rel="stylesheet" href="./v2.css" />
   <script src="./firebase-config.js" defer></script>
   <script type="module" src="./app.js"></script>
 </head>
 <body>
-  <div class="app-shell">
+  <section id="onboarding" class="onboarding" aria-label="LinkRoomを始める">
+    <div class="onboard-decor decor-one"></div><div class="onboard-decor decor-two"></div>
+    <div class="onboard-top"><span class="brand-mini">L<span>✦</span></span><strong>LinkRoom</strong><span class="onboard-tag">PRIVATE CHAT SPACE</span><button type="button" id="welcome-theme-button" class="welcome-theme-button" aria-label="表示テーマを切り替える">☀️ ライトモード</button></div>
+    <div class="onboard-card">
+      <div class="step-page" data-step="welcome">
+        <div class="welcome-graphic"><div class="graphic-orbit orbit-a"></div><div class="graphic-orbit orbit-b"></div><div class="graphic-main">✦</div><div class="graphic-bubble bubble-a">💬</div><div class="graphic-bubble bubble-b">💜</div></div>
+        <span class="eyebrow">WELCOME TO LINKROOM</span>
+        <h1 class="onboard-title">大切な仲間と、<br><em>気軽につながろう。</em></h1>
+        <p class="onboard-description">自分だけのチャットルームを作ったり、招待コードで友達の部屋に参加したり。メッセージ・リアクション・ファイルを共有できるチャットサイトです。</p>
+        <div class="feature-pills"><span>🔑 招待制の部屋</span><span>💬 リアルタイム</span><span>📱 スマホ対応</span></div>
+        <button class="action-primary action-wide" type="button" id="welcome-start">始める <span aria-hidden="true">→</span></button>
+        <p class="onboard-caption">登録メールアドレス不要。ニックネームで始められます。</p>
+      </div>
+      <div class="step-page" data-step="nickname" hidden>
+        <div class="step-counter">STEP 01 / 02</div><div class="step-icon">👋</div>
+        <h2 class="onboard-heading">あなたの名前を教えてね</h2>
+        <p class="step-explain">チャットで表示するニックネームを決めよう。あとから変更できます。</p>
+        <form id="onboard-name-form">
+          <label class="field-label" for="onboard-nickname">ニックネーム（24文字以内）</label>
+          <input class="onboard-input" id="onboard-nickname" maxlength="24" placeholder="例：みーこ" required autocomplete="nickname" />
+          <button type="submit" class="action-primary action-wide">次へ進む <span aria-hidden="true">→</span></button>
+        </form>
+        <button class="plain-back" type="button" data-back="welcome">← 戻る</button>
+      </div>
+      <div class="step-page" data-step="choice" hidden>
+        <div class="step-counter">STEP 02 / 02</div><div class="step-icon">✨</div>
+        <h2 class="onboard-heading"><span id="choice-name"></span>、ようこそ！</h2>
+        <p class="step-explain">今日はどうやってチャットを始める？</p>
+        <div class="option-stack">
+          <button class="option-button" type="button" id="choose-create"><span class="option-symbol">＋</span><span><strong>新しいチャットを作る</strong><small>名前を決めて招待コードを発行</small></span><span class="option-arrow">→</span></button>
+          <button class="option-button" type="button" id="choose-join"><span class="option-symbol">⌗</span><span><strong>招待コードで参加する</strong><small>友達からもらったコードを入力</small></span><span class="option-arrow">→</span></button>
+        </div>
+        <div id="saved-room-section" class="saved-room-section" hidden><div class="saved-room-title">前に参加した部屋</div><div id="saved-room-buttons" class="saved-room-buttons"></div></div>
+        <button class="plain-back" type="button" data-back="nickname">← 名前を変更する</button>
+      </div>
+      <div class="step-page" data-step="create" hidden>
+        <div class="step-counter">CREATE A ROOM</div><div class="step-icon">💬</div>
+        <h2 class="onboard-heading">新しいチャットを作ろう</h2>
+        <p class="step-explain">部屋の名前を決めると、参加に必要な招待コードが自動生成されます。</p>
+        <form id="create-room-form">
+          <label class="field-label" for="create-room-name">チャット名（60文字以内）</label>
+          <input class="onboard-input" id="create-room-name" maxlength="60" placeholder="例：VRChatの仲間たち" required />
+          <button class="action-primary action-wide" id="create-room-submit" type="submit">チャットを作成する <span aria-hidden="true">→</span></button>
+        </form>
+        <button class="plain-back" type="button" data-back="choice">← 戻る</button>
+      </div>
+      <div class="step-page" data-step="join" hidden>
+        <div class="step-counter">JOIN A ROOM</div><div class="step-icon">🔑</div>
+        <h2 class="onboard-heading">招待コードを入力</h2>
+        <p class="step-explain">部屋を作った人から教えてもらったコードを入力してね。</p>
+        <form id="join-room-form">
+          <label class="field-label" for="join-code">招待コード</label>
+          <input class="onboard-input code-entry" id="join-code" maxlength="35" placeholder="XXXX-XXXX-XXXX-XXXX-XXXX-XXXX" required autocomplete="off" autocapitalize="characters" spellcheck="false" />
+          <button class="action-primary action-wide" id="join-room-submit" type="submit">この部屋に参加する <span aria-hidden="true">→</span></button>
+        </form>
+        <button class="plain-back" type="button" data-back="choice">← 戻る</button>
+      </div>
+      <div class="step-page" data-step="created" hidden>
+        <div class="step-counter">ROOM READY!</div><div class="step-icon">🎉</div>
+        <h2 class="onboard-heading">チャットが完成！</h2>
+        <p class="step-explain"><strong id="created-room-name"></strong> の招待コードができたよ。友達に共有して参加してもらおう！</p>
+        <div class="invite-code-box"><span class="field-label">招待コード</span><strong id="created-code" class="big-code"></strong><button type="button" id="created-copy" class="copy-code-button">コードをコピー</button></div>
+        <p class="onboard-caption">このコードを知っている人は参加できます。知らない人には教えないでね。</p>
+        <button class="action-primary action-wide" id="created-enter" type="button">チャットを開く <span aria-hidden="true">→</span></button>
+      </div>
+      <p class="onboard-alert" id="onboard-alert" role="alert" hidden></p>
+      <p class="connection-notice" id="onboard-connection">接続準備中…</p>
+    </div>
+    <div class="onboard-foot">LinkRoom <span>✦</span> つながる、ひろがる。</div>
+  </section>
+
+  <div class="app-shell" id="app-shell" hidden>
     <nav class="server-rail" aria-label="ワークスペース">
-      <div class="rail-logo" title="LinkRoom">L<span class="rail-star">✦</span></div>
-      <div class="rail-divider"></div>
-      <div class="rail-server rail-server-active" aria-label="コミュニティ" title="コミュニティ">
-        <svg class="icon" aria-hidden="true"><use href="#i-message-square"></use></svg>
-      </div>
-      <div class="rail-spacer"></div>
-      <button class="rail-action" id="theme-button" title="テーマを切り替え" aria-label="テーマを切り替え" type="button">
-        <svg class="icon" aria-hidden="true"><use href="#i-moon"></use></svg>
-      </button>
+      <div class="rail-logo" title="LinkRoom">L<span class="rail-star">✦</span></div><div class="rail-divider"></div>
+      <div class="rail-server rail-server-active" title="マイルーム"><svg class="icon"><use href="#i-message-square"></use></svg></div><div class="rail-spacer"></div>
+      <button class="rail-action" id="theme-button" title="テーマを切り替え" aria-label="テーマを切り替え" type="button"><svg class="icon"><use href="#i-moon"></use></svg></button>
     </nav>
-
     <div id="mobile-backdrop" class="mobile-backdrop" hidden></div>
-
-    <aside class="channel-panel" id="channel-panel" aria-label="チャンネル一覧">
-      <div class="workspace-title">
-        <div class="workspace-logo">✦</div>
-        <div class="workspace-copy"><strong>LinkRoom</strong><span>COMMUNITY SPACE</span></div>
-        <button class="icon-button mobile-close" id="close-menu" aria-label="メニューを閉じる" type="button">
-          <svg class="icon"><use href="#i-x"></use></svg>
-        </button>
-      </div>
+    <aside class="channel-panel" id="channel-panel" aria-label="チャットルーム一覧">
+      <div class="workspace-title"><div class="workspace-logo">✦</div><div class="workspace-copy"><strong>LinkRoom</strong><span>YOUR PRIVATE SPACE</span></div><button class="icon-button mobile-close" id="close-menu" aria-label="メニューを閉じる" type="button"><svg class="icon"><use href="#i-x"></use></svg></button></div>
       <div class="channel-scroll">
-        <div class="community-card">
-          <span class="community-pill"><span class="small-green-dot"></span> YOUR COMMUNITY</span>
-          <h2>ようこそ、<br>LinkRoomへ <span>👋</span></h2>
-          <p>話したいことを、自由に。</p>
-          <div class="community-orb orb-one"></div><div class="community-orb orb-two"></div>
-        </div>
-        <div class="section-heading"><span>テキストチャンネル</span><svg class="icon"><use href="#i-chevron-down"></use></svg></div>
-        <div class="channels" id="channel-buttons" role="navigation" aria-label="部屋を選択">
-          <button class="channel active" type="button" data-room="general" aria-current="page"><span class="channel-hash">#</span><span>雑談ルーム</span><span class="channel-live-dot"></span></button>
-          <button class="channel" type="button" data-room="vrchat"><span class="channel-hash">#</span><span>VRChat</span></button>
-          <button class="channel" type="button" data-room="gaming"><span class="channel-hash">#</span><span>ゲーム・趣味</span></button>
-        </div>
-        <div class="section-heading space-above"><span>このサイトについて</span></div>
-        <div class="side-note"><svg class="icon"><use href="#i-shield"></use></svg><span>気持ちのよい会話を<br>心がけましょう</span></div>
-        <button class="invite-button" id="invite-button" type="button"><svg class="icon"><use href="#i-link"></use></svg><span>サイトのリンクをコピー</span></button>
+        <div class="community-card"><span class="community-pill"><span class="small-green-dot"></span> INVITE-ONLY CHAT</span><h2>ここは、<br>みんなの居場所 <span>💜</span></h2><p>招待した仲間と話そう。</p><div class="community-orb orb-one"></div><div class="community-orb orb-two"></div></div>
+        <div class="section-heading"><span>参加したチャット</span><svg class="icon"><use href="#i-chevron-down"></use></svg></div>
+        <div class="channels" id="channel-buttons" role="navigation" aria-label="部屋を選択"></div>
+        <button class="invite-button" id="add-room-button" type="button"><span class="add-room-plus">＋</span><span>部屋を作成・参加する</span></button>
+        <div class="section-heading space-above"><span>招待コード</span></div><div class="side-note"><svg class="icon"><use href="#i-shield"></use></svg><span>招待コードを知っている人だけが部屋に参加できます。</span></div>
+        <button class="invite-button" id="invite-button" type="button"><svg class="icon"><use href="#i-link"></use></svg><span>招待コードをコピー</span></button>
       </div>
-      <div class="user-area">
-        <div class="user-avatar" id="my-avatar">G</div>
-        <div class="user-info"><strong id="my-name">ゲスト</strong><span><span class="small-green-dot"></span> オンライン</span></div>
-        <button class="icon-button" id="edit-profile-button" title="名前を変更" aria-label="名前を変更" type="button"><svg class="icon"><use href="#i-settings"></use></svg></button>
-      </div>
+      <div class="user-area"><div class="user-avatar" id="my-avatar">?</div><div class="user-info"><strong id="my-name">ゲスト</strong><span><span class="small-green-dot"></span> 参加中</span></div><button class="icon-button" id="edit-profile-button" title="名前を変更" aria-label="名前を変更" type="button"><svg class="icon"><use href="#i-settings"></use></svg></button></div>
     </aside>
 
     <main class="chat-main">
-      <header class="chat-header">
-        <div class="header-left">
-          <button class="icon-button hamburger" id="open-menu" aria-label="チャンネルメニューを開く" type="button"><svg class="icon"><use href="#i-menu"></use></svg></button>
-          <div class="header-hash">#</div>
-          <div class="header-room"><h1 id="room-title">雑談ルーム</h1><p id="room-subtitle">気軽におしゃべりしよう</p></div>
-        </div>
-        <div class="header-tools">
-          <span class="connection-status" id="connection-status"><span class="status-circle"></span><span id="connection-text">準備中</span></span>
-          <button class="icon-button" id="search-button" title="メッセージを検索" aria-label="メッセージを検索" aria-expanded="false" type="button"><svg class="icon"><use href="#i-search"></use></svg></button>
-          <button class="icon-button" id="info-button" title="この部屋について" aria-label="この部屋について" aria-expanded="false" type="button"><svg class="icon"><use href="#i-info"></use></svg></button>
-        </div>
+      <header class="chat-header"><div class="header-left"><button class="icon-button hamburger" id="open-menu" aria-label="部屋一覧を開く" type="button"><svg class="icon"><use href="#i-menu"></use></svg></button><div class="header-hash">#</div><div class="header-room"><h1 id="room-title">部屋を選択</h1><p id="room-subtitle">招待制チャット</p></div></div>
+        <div class="header-tools"><span class="connection-status" id="connection-status"><span class="status-circle"></span><span id="connection-text">準備中</span></span><button class="icon-button" id="search-button" title="検索" aria-label="メッセージを検索" aria-expanded="false" type="button"><svg class="icon"><use href="#i-search"></use></svg></button><button class="icon-button" id="info-button" title="部屋の情報" aria-label="部屋の情報" aria-expanded="false" type="button"><svg class="icon"><use href="#i-info"></use></svg></button></div>
       </header>
-
-      <div class="search-bar" id="search-bar" hidden>
-        <svg class="icon" aria-hidden="true"><use href="#i-search"></use></svg>
-        <input id="search-input" type="search" maxlength="100" placeholder="この部屋の最新100件から検索…" aria-label="メッセージを検索" />
-        <button class="icon-button" id="close-search" type="button" aria-label="検索を閉じる"><svg class="icon"><use href="#i-x"></use></svg></button>
-      </div>
-
-      <div id="demo-banner" class="demo-banner" hidden>
-        <svg class="icon" aria-hidden="true"><use href="#i-info"></use></svg>
-        <span><strong>デモモード</strong> — メッセージはこのブラウザだけに保存。別端末と会話するには Firebase を設定してね。</span>
-      </div>
-      <div id="error-banner" class="error-banner" hidden role="alert"></div>
-
-      <section class="conversation" id="conversation" aria-label="メッセージ">
-        <div class="conversation-inner">
-          <div class="room-intro">
-            <div class="room-intro-icon">#</div>
-            <span class="eyebrow">WELCOME TO THE CHANNEL</span>
-            <h2 id="intro-title">雑談ルームへようこそ！</h2>
-            <p id="intro-description">なんでも気軽に話してね。ここから会話が始まります。</p>
-            <div class="intro-divider"></div>
-          </div>
-          <div id="messages" class="messages" aria-live="polite" aria-relevant="additions text"></div>
-          <div id="empty-state" class="empty-state" hidden>まだ投稿がありません。最初のメッセージを送ってみよう！ ✨</div>
-        </div>
-      </section>
-
-      <div class="composer-wrap">
-        <div class="composer-hint"><span><span class="small-green-dot"></span> <span id="composer-channel"># 雑談ルーム</span></span><span>みんなに届くメッセージ</span></div>
-        <form id="message-form" class="composer" autocomplete="off">
-          <textarea id="message-input" rows="1" maxlength="2000" placeholder="メッセージを入力…" aria-label="メッセージを入力" required></textarea>
-          <button id="send-button" type="submit" class="send-button" aria-label="送信"><svg class="icon"><use href="#i-send"></use></svg></button>
-        </form>
-        <div class="composer-footer"><span>Enter で送信 ・ Shift + Enter で改行</span><span id="char-counter">0 / 2000</span></div>
+      <div class="search-bar" id="search-bar" hidden><svg class="icon"><use href="#i-search"></use></svg><input id="search-input" type="search" maxlength="100" placeholder="最新100件から検索…" aria-label="メッセージを検索" /><button class="icon-button" id="close-search" aria-label="検索を閉じる" type="button"><svg class="icon"><use href="#i-x"></use></svg></button></div>
+      <div class="demo-banner" id="demo-banner" hidden><svg class="icon"><use href="#i-info"></use></svg><span><strong>デモモード</strong> — 同じ端末内でのテスト用です。友達とリアルタイムで会話するにはFirebaseを設定してください。</span></div>
+      <div class="error-banner" id="error-banner" hidden role="alert"></div>
+      <section class="conversation" id="conversation" aria-label="メッセージ"><div class="conversation-inner"><div class="room-intro"><div class="room-intro-icon">#</div><span class="eyebrow">WELCOME TO THE ROOM</span><h2 id="intro-title">部屋へようこそ！</h2><p id="intro-description">仲間とメッセージを送り合おう。</p><div class="intro-divider"></div></div><div class="messages" id="messages" aria-live="polite" aria-relevant="additions text"></div><div id="empty-state" class="empty-state" hidden>まだ投稿がありません。最初のメッセージを送ってみよう！ ✨</div></div></section>
+      <div class="composer-wrap"><div class="composer-hint"><span><span class="small-green-dot"></span> <span id="composer-channel"># チャット</span></span><span>招待された人に届きます</span></div>
+        <div id="upload-status" class="upload-status" role="status" aria-live="polite" hidden></div>
+        <div class="file-preview" id="file-preview" hidden><span id="file-preview-name"></span><button id="remove-file" aria-label="添付を取り消す" title="添付を取り消す" type="button">×</button></div>
+        <form id="message-form" class="composer" autocomplete="off"><button type="button" class="attach-button" id="attach-button" aria-label="ファイルを添付" title="ファイルを添付"><svg class="icon"><use href="#i-paperclip"></use></svg></button><input type="file" id="file-input" hidden aria-label="送信するファイル" /><textarea id="message-input" rows="1" maxlength="2000" placeholder="メッセージを入力…" aria-label="メッセージを入力"></textarea><button id="send-button" type="submit" class="send-button" aria-label="送信"><svg class="icon"><use href="#i-send"></use></svg></button></form>
+        <div class="composer-footer"><span id="upload-info">📎 添付ファイルは256KBまで無料枠で送信可能</span><span id="char-counter">0 / 2000</span></div>
       </div>
     </main>
 
-    <aside class="info-panel" id="info-panel" aria-label="コミュニティ情報">
-      <div class="info-top"><h2>コミュニティ情報</h2><button id="close-info" type="button" class="icon-button info-close" aria-label="情報を閉じる"><svg class="icon"><use href="#i-x"></use></svg></button></div>
-      <div class="info-content">
-        <div class="info-hero"><div class="info-hero-icon">✦</div><strong>LinkRoom</strong><span>つながる、ひろがる。</span></div>
-        <div class="info-block"><div class="info-label">このチャンネル</div><strong id="info-room"># 雑談ルーム</strong><p id="info-description">気軽におしゃべりしよう</p></div>
-        <div class="info-block"><div class="info-label">チャットのルール</div><div class="rule-item"><span>💜</span> お互いを尊重しよう</div><div class="rule-item"><span>🛡️</span> 個人情報を書かない</div><div class="rule-item"><span>✨</span> みんなが楽しめる場所に</div></div>
-        <div class="info-block info-help"><div class="info-label">使い方</div><p>プロフィールの歯車から表示名を変更できます。自分の投稿は削除できます。</p></div>
-      </div>
-    </aside>
+    <aside class="info-panel" id="info-panel" aria-label="部屋の情報"><div class="info-top"><h2>チャットルーム情報</h2><button id="close-info" type="button" class="icon-button info-close" aria-label="情報を閉じる"><svg class="icon"><use href="#i-x"></use></svg></button></div><div class="info-content"><div class="info-hero"><div class="info-hero-icon">✦</div><strong>LinkRoom</strong><span>プライベートチャット</span></div>
+      <div class="info-block"><div class="info-label">このチャット</div><strong id="info-room"># チャット名</strong><p id="info-description">招待コードを持つ人が参加できます。</p></div>
+      <div class="info-block"><div class="info-label">招待コード</div><div class="inline-code" id="info-code"></div><button type="button" id="info-copy" class="small-copy-button">招待コードをコピー</button></div>
+      <div class="info-block"><div class="info-label">チャットのルール</div><div class="rule-item"><span>💜</span> お互いを尊重しよう</div><div class="rule-item"><span>🛡️</span> 招待コードを不用意に広めない</div><div class="rule-item"><span>✨</span> 不明なファイルは開かない</div></div>
+      <div class="info-block info-help"><div class="info-label">使い方</div><p>メッセージに絵文字のリアクションは絵文字を押すと取り消せます。別の絵文字を選ぶと変更できます。クリップボタンでファイルを添付できます。</p></div>
+    </div></aside>
   </div>
-
-  <dialog id="profile-dialog" class="profile-dialog" aria-labelledby="profile-dialog-title">
-    <form id="profile-form" method="dialog">
-      <div class="modal-mark">✦</div><h2 id="profile-dialog-title">プロフィール設定</h2>
-      <p>チャットで表示される名前を設定しよう。</p>
-      <label for="nickname-input">表示名（24文字以内）</label>
-      <input id="nickname-input" name="nickname" maxlength="24" required autocomplete="nickname" placeholder="例：みーこ" />
-      <div class="modal-note">※ 名前の変更は今後の投稿に反映されます。過去の投稿の名前は変わりません。</div>
-      <div class="modal-actions"><button class="button-secondary" type="button" id="cancel-profile">キャンセル</button><button class="button-primary" type="submit">保存する</button></div>
-    </form>
-  </dialog>
+  <dialog id="profile-dialog" class="profile-dialog" aria-labelledby="profile-dialog-title"><form id="profile-form" method="dialog"><div class="modal-mark">✦</div><h2 id="profile-dialog-title">プロフィール設定</h2><p>チャットで表示される名前を変更できます。</p><label for="nickname-input">ニックネーム（24文字以内）</label><input id="nickname-input" maxlength="24" required autocomplete="nickname" /><div class="modal-note">※変更は次の投稿に反映されます。過去の投稿の表示名は変わりません。</div><div class="modal-actions"><button class="button-secondary" type="button" id="cancel-profile">キャンセル</button><button class="button-primary" type="submit">保存する</button></div></form></dialog>
   <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
-
-  <!-- 追加ライブラリなしの軽量SVGアイコン -->
   <svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
     <symbol id="i-message-square" viewBox="0 0 24 24"><path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8A8.5 8.5 0 0 1 12.5 20a8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8A8.5 8.5 0 0 1 12.5 3H13a8.5 8.5 0 0 1 8 8v.5Z"/></symbol>
     <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20.9 13.4A9 9 0 0 1 10.6 3.1 9 9 0 1 0 20.9 13.4Z"/></symbol>
     <symbol id="i-chevron-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
     <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-4"/></symbol>
     <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7 .5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></symbol>
-    <symbol id="i-settings" viewBox="0 0 24 24"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.86 2.86-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 1.56V21h-4v-.04A1.7 1.7 0 0 0 9 19.4a1.7 1.7 0 0 0-1.88.34l-.06.06-2.86-2.86.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.56-1H3v-4h.04A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.34-1.88l-.06-.06L7.06 4.2l.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-1.56V3h4v.04A1.7 1.7 0 0 0 15 4.6a1.7 1.7 0 0 0 1.88-.34l.06-.06 2.86 2.86-.06.06A1.7 1.7 0 0 0 19.4 9a1.7 1.7 0 0 0 1.56 1H21v4h-.04A1.7 1.7 0 0 0 19.4 15Z"/></symbol>
+    <symbol id="i-settings" viewBox="0 0 24 24"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.86 2.86-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 1.56V21h-4v-.04A1.7 1.7 0 0 0 9 19.4a1.7 1.7 0 0 0-1.88.34l-.06.06-2.86-2.86.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.56-1H3v-4h.04A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.34-1.88l-.06-.06L7.06 4.2l.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-1.56V3h4v.04A1.7 1.7 0 0 0 15 4.6a1.7 1.7 0 0 0 1.88-.34l.06-.06 2.86 2.86-.06.06A1.7 1.7 0 0 0 19.4 9a1.7 1.7 0 0 0 1.56 1H21v4h-.04A1.7 1.7 0 0 0 19.4 15a1.7 1.7 0 0 0 .34-1.88L19.4 15Z"/></symbol>
     <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></symbol>
     <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></symbol>
     <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></symbol>
     <symbol id="i-send" viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4 20-7ZM22 2 11 13"/></symbol>
+    <symbol id="i-paperclip" viewBox="0 0 24 24"><path d="m21.4 11.6-8.9 8.9a6 6 0 0 1-8.5-8.5l9.7-9.7a4 4 0 0 1 5.7 5.7l-9.7 9.7a2 2 0 0 1-2.8-2.8L16 5.8"/></symbol>
     <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
     <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M6 6l1 15h10l1-15M10 10v7M14 10v7"/></symbol>
   </svg>

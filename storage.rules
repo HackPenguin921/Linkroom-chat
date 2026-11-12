@@ -1,0 +1,37 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    function member(code) {
+      return request.auth != null && firestore.exists(
+        /databases/(default)/documents/rooms/$(code)/members/$(request.auth.uid)
+      );
+    }
+    function messageFile(code, messageId, fileId) {
+      return firestore.get(
+        /databases/(default)/documents/rooms/$(code)/messages/$(messageId)
+      ).data.file.path == 'rooms/' + code + '/' + messageId + '/' + fileId;
+    }
+    function validMime(m) {
+      return m in [
+        'image/png','image/jpeg','image/webp','image/gif','application/pdf',
+        'text/plain','text/csv','application/zip',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'application/vnd.openxmlformats-officedocument.presentationml.presentation'
+      ];
+    }
+    match /rooms/{roomId}/{messageId}/{fileId} {
+      allow get: if member(roomId) && messageFile(roomId, messageId, fileId);
+      allow list: if false;
+      allow create: if member(roomId) && messageFile(roomId, messageId, fileId)
+        && request.resource.size > 0 && request.resource.size <= 8388608
+        && validMime(request.resource.contentType);
+      allow update: if false;
+      allow delete: if member(roomId) && messageFile(roomId, messageId, fileId)
+        && firestore.get(
+          /databases/(default)/documents/rooms/$(roomId)/messages/$(messageId)
+        ).data.uid == request.auth.uid;
+    }
+    // No public files or blanket read rules.
+  }
+}

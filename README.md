@@ -1,94 +1,71 @@
-# LinkRoom — Discord風のチャットサイト
+# LinkRoom Ver.2.1 — 招待コード制・リアルタイムチャット
 
-VS Code と GitHub Pages で使える、スマホ・PC対応のチャットサイトです。HTML / CSS / JavaScript で構築しています。
+スマホとパソコンに対応した、Discord風のチャットサイトです。**GitHub Pages + Firebase Authentication + Cloud Firestore**で利用できます。HTML/CSS/JavaScriptのみなのでビルドは不要です。
 
-## 機能
-- Discord風のレスポンシブなダークUI（ライトモードもあり）
-- 3つの部屋：雑談 / VRChat / ゲーム・趣味
-- テキスト投稿、Enterで送信・Shift+Enterで改行、日本語IME対応
-- 表示名の変更、自分の投稿の削除、最新100件の検索
-- **Firebase 設定後**：別々のスマホ・PCから、リアルタイムにメッセージを共有
-- **Firebase 未設定**：そのブラウザ内だけで保存されるデモモード
+## 新機能
 
-> **注意**：これは初学者向けの公開チャットのひな形です。ログイン必須のプライベートサーバー、DM、音声通話、ファイル添付、既読、オンライン人数、通報・BAN、スパム対策は未実装です。Firebaseは匿名認証のため、URLを知っていれば基本的に誰でも参加できます。本格公開時は参加制限やモデレーションが必要です。
+- ウェルカムページ → 「始める」→ ニックネーム設定 → 部屋の新規作成／招待コードで参加
+- チャット名を付けると、推測しづらい24文字の英数字の招待コードを自動作成（4文字区切り表示）
+- 招待コードを持ち、匿名認証したユーザーだけが部屋に参加できる権限制御（Firestore Rules）
+- メッセージへの絵文字リアクション：付ける・**別の絵文字に変更**・同じ絵文字を押して**取り消し**
+- ライト／ダークモード（ウェルカム画面とチャット画面の両方）
+- ファイル添付・ダウンロード：**Firebase無料のSparkプランでは最大3 MiB**（約3.1 MB）
+- 既に参加した部屋を、このブラウザに記憶／部屋の切り替え／メッセージ検索／自分のメッセージ削除
 
-## 1. VS Codeで動かす（デモ）
+## まず読む
 
-1. フォルダ `discord_style_chat` を VS Code で開きます。
-2. VS Code の拡張機能 **Live Server**（Ritwick Dey）をインストールします。
-3. `index.html` を右クリックし **Open with Live Server** を選びます。
-4. チャットできます。投稿はブラウザの localStorage に保存されます（**他の端末には届きません**）。
+**[`SETUP_GUIDE.md`](./SETUP_GUIDE.md)** に、更新方法・Firebaseルール設定・動作確認を順番に記載しています。
 
-**必ず Live Server などのローカルWebサーバーから開いてください。** `file://` で直接開くと、ブラウザが JavaScript モジュールをブロックすることがあります。
+## 使い方
 
-## 2. Firebaseで本物のリアルタイムチャットにする
+1. `index.html` を VS Code の **Live Server** で開きます。Firebase設定前は同じブラウザ内だけで動く**デモモード**です。
+2. 「始める」から表示名を入力し、「新しいチャットを作る」を選択。
+3. チャット名を入れて作成。表示された招待コードをコピーし、友達に送ります。
+4. 友達は同じサイトの「始める」→ 表示名 →「招待コードで参加する」から入力します。
+5. チャット画面のクリップでファイルを選択、送信ボタンで共有できます。リアクションは「☺ ＋」から選べます。
+6. 背景テーマは上部の「ライトモード／ダークモード」ボタン、またはチャット左端の月ボタンで変更できます。
 
-1. https://console.firebase.google.com/ で **プロジェクトを追加**。
-2. **プロジェクトの設定 → マイアプリ → ウェブアプリ（`</>`）** を登録します。表示される `firebaseConfig` の値を確認します。
-3. このフォルダの `firebase-config.js` を開いて、`apiKey`, `authDomain`, `projectId`, `appId` に実際の値を入れて保存します（必要なら `messagingSenderId` や `storageBucket` も追加可）。
-4. Firebaseコンソールの **Authentication → Sign-in method** で **匿名（Anonymous）** を有効にします。
-5. Firebaseコンソールの **Firestore Database** でデータベースを作成します（初期の試用では無料枠を利用できる構成を選択）。リージョンは後から簡単に変えられないので選択に注意してください。
-6. **Firestore Database → ルール（Rules）** に `firestore.rules` の内容を**すべて**貼り、**公開（Publish）**します。テストモードの全開放ルールをそのまま公開しないでください。
-7. 認証画面で、必要に応じて **Settings → Authorized domains** に公開ドメインを追加してください。最近のFirebaseプロジェクトでは localhost が自動追加されない場合があります。
-8. ブラウザを更新して、右上が **リアルタイム** になればOK！別の端末も同じURLにアクセスするとメッセージを共有できます。
+## ファイル構成
 
-Firestore の保存先は `rooms/{roomId}/messages/{messageId}` です。チャンネルIDは `general`, `vrchat`, `gaming` の3種類です。
-
-### Firebase設定の例（実値ではありません）
-
-```js
-window.CHAT_FIREBASE_CONFIG = {
-  apiKey: "AIzaxxxxxxxxxxxxxxxxx",
-  authDomain: "your-project.firebaseapp.com",
-  projectId: "your-project",
-  appId: "1:123456789:web:abcdefgh"
-};
+```text
+linkroom/
+├── index.html            # ウェルカム、入室フロー、チャット UI
+├── styles.css            # Discord風デザイン（従来版）
+├── v2.css                # 新しいページ・リアクション・添付・スマホ対応
+├── app.js                # 部屋作成、招待、送信、リアクション、添付
+├── firebase-config.js    # 【自分のFirebase設定値を入力】
+├── firestore.rules       # 【Firebase Consoleで公開が必要】
+├── storage.rules         # 8MBオプションを使う場合のみ
+├── .nojekyll             # GitHub Pages向け
+├── SETUP_GUIDE.md        # 導入・更新手順
+└── README.md
 ```
 
-FirebaseのWeb用設定情報は通常、公開クライアントに含めて構いません。ただし**Firebaseのセキュリティルールは必須**です。サービスアカウントのJSONや秘密鍵は絶対にGitHubへ公開しないでください。
+## 無料プランとファイル添付
 
-## 3. GitHub Pagesで公開する
+| 環境 | 最大ファイルサイズ | 保存方法 |
+| --- | ---: | --- |
+| Firebase設定なし（デモ） | 256 KiB | ブラウザのlocalStorage（他端末と共有しない） |
+| Firebase Spark（無料） | 3 MiB | Firestore内で分割保存（256 KiB以下はメッセージに直接保存） |
+| Cloud Storage追加（任意・Blazeプラン） | 8 MiB | 3 MiBまではFirestore、それ以上はCloud Storage |
 
-1. GitHubで新しいリポジトリ（例：`linkroom-chat`）を作成します。
-2. このフォルダのファイルをリポジトリのルートにアップロード / push します（`index.html` は最上位に置きます）。
-3. リポジトリの **Settings → Pages → Build and deployment** で **Deploy from a branch** を選択し、`main` / `/(root)` → **Save**。
-4. 公開URL例：`https://<あなたのユーザー名>.github.io/linkroom-chat/`
-5. Firebaseの Authentication に許可ドメイン設定が必要な場合、`<あなたのユーザー名>.github.io` を追加してください（URLパスは含めません）。
+ファイル形式：**PNG/JPG/WEBP/GIF/PDF/TXT/CSV/ZIP/DOCX/XLSX/PPTX**。
 
-> VS Codeのターミナルから Git を使う場合：
->
-> ```bash
-> git init
-> git add .
-> git commit -m "Create LinkRoom chat"
-> git branch -M main
-> git remote add origin https://github.com/USER/linkroom-chat.git
-> git push -u origin main
-> ```
-> `USER` は自分のGitHubユーザー名に置き換え、先に空のリポジトリを作ってください。
+**注意：** FirebaseのFirestoreは、画像・ファイル保管に特化したサービスではありません。この実装は少人数・小容量向けです。大きなファイルを頻繁に送ると、無料枠の読み書き回数・保存容量・通信量を多く消費します。Cloud Storage for Firebaseは2026年2月3日以降、Blazeプランが必要です。
 
-## 4. デザイン・部屋を変える
+## 招待コードの安全性について
 
-- 色・サイズ・スマホ表示：`styles.css`
-- 文章・部屋の見た目：`index.html`
-- 部屋の名前・説明：`app.js` 冒頭の `ROOMS`
-- 部屋の追加は `ROOMS` だけでなく `index.html` の `[data-room]` ボタンと `firestore.rules` の `validRoom()` にも追加してください。
-
-## よくあるエラー
-
-- **デモモードのまま**：`firebase-config.js` の4項目が空欄です。Firebase設定を埋めて更新してください。
-- **接続エラー**：匿名認証の有効化、設定の値、インターネット接続を確認してください。
-- **Missing or insufficient permissions**：Firestore の `firestore.rules` が未公開か、ルールが一致していない可能性があります。
-- **他端末と共有されない**：両端末が同じFirebaseプロジェクトに接続し、右上が「リアルタイム」か確かめてください。
-- **投稿が増えて課金**：Firestore には読み書きなどの利用枠・上限があります。Firebaseの利用量と請求設定を確認してください。
-
-## セキュリティ上の制限
-
-匿名認証は、利用者本人確認ではありません。名前も自由に変えられます。このひな形は**一般公開の参加制限つきチャットではありません**。利用を限定したい場合は、Googleログインなどのアカウント認証と Firestore のアクセス制御を追加してください。連投制限、NGワード、管理者削除、通報、App Check などは別途設計が必要です。メッセージは参加できるユーザーなら閲覧できます。個人情報や秘密の会話は投稿しないでください。
+- **24文字を暗号学的乱数で生成**し、部屋IDとして扱います。部屋一覧の列挙はFirebaseのルールで禁止しています。
+- メッセージ・添付・リアクションは、**その部屋のメンバー登録済み**の匿名認証ユーザーに限り読み書きできます。
+- 招待コードを知る人は、誰でも匿名認証して参加できます。**参加の承認制、メンバー追放、コードの無効化、管理者による削除機能はまだありません**。
+- これはエンドツーエンド暗号化チャットではありません。機密情報・個人情報の共有は控えてください。
+- 匿名ログインのブラウザデータを消すとFirebaseのユーザーIDが変わります。再入室には招待コードが必要です。
+- 旧版の公開チャンネル（雑談など）は新しい招待制ルームに**自動移行しません**。
 
 ## 公式ドキュメント
 
-- Firebase 匿名認証：https://firebase.google.com/docs/auth/web/anonymous-auth
-- Firestore リアルタイム更新：https://firebase.google.com/docs/firestore/query-data/listen
-- Firestore セキュリティルール：https://firebase.google.com/docs/firestore/security/get-started
-- GitHub Pages：https://docs.github.com/ja/pages/getting-started-with-github-pages/creating-a-github-pages-site
+- [Firebase Console](https://console.firebase.google.com/)
+- [Cloud Firestoreセキュリティルール](https://firebase.google.com/docs/firestore/security/get-started?hl=ja)
+- [Firestore無料枠と制限](https://firebase.google.com/docs/firestore/quotas?hl=ja)
+- [Cloud Storageの料金プラン要件](https://firebase.google.com/docs/storage/faqs-storage-changes-announced-sept-2024)
+- [GitHub Pages](https://docs.github.com/ja/pages/getting-started-with-github-pages/creating-a-github-pages-site)

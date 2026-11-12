@@ -1,9 +1,13 @@
-// Firebase コンソール → プロジェクトの設定 → ウェブアプリの設定 からコピーして埋めてください。
-// 未設定のままなら「デモモード」で、この端末だけで動作します。
-// この Web API Key は通常の公開用設定値です。アクセス制御には firestore.rules が必要です。
+// Firebase Console > Project settings > Your apps > Web app > SDK setup and configuration.
+// If left blank, LinkRoom runs a local demo ONLY (not shared across devices).
+// IMPORTANT: When upgrading an existing working website, copy YOUR existing config into this file.
+// Web API keys are public identifiers: protection is provided by firestore.rules / storage.rules.
 window.CHAT_FIREBASE_CONFIG = {
-  apiKey: "AIzaSyDkZN5Z9LApCNrmu4Zi-WgqPLIaIt-gLYY",
-  authDomain: "linkroom-chat.firebaseapp.com",
-  projectId: "linkroom-chat",
-  appId: "1:247964910425:web:cac298c1df7c399d498248"
+  apiKey: "",
+  authDomain: "",
+  projectId: "",
+  appId: "",
+  storageBucket: "" // Optional: required only for files larger than 3MiB.
 };
+// Optional / Blaze billing only: set true AFTER configuring Cloud Storage and its rules. Spark users: keep false.
+window.CHAT_ENABLE_STORAGE_UPLOADS = false;
